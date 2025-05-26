@@ -10,10 +10,13 @@ from datetime import datetime
 def load_data():
     summary_df = pd.read_csv("may1.csv", skiprows=4)
     performance_df = pd.read_csv("may2.csv", skiprows=4)
-    attendance_df = pd.read_excel("May_2025_Attendance_Enhanced_AMPM.xlsx", sheet_name="Attendance Enhanced (AMPM)")
-    return summary_df, performance_df, attendance_df
+    attendance_df = pd.read_csv("Attendance Enhanced (AMPM)-Table 1.csv", index_col=0)
+    checkins_df = pd.read_csv("Daily Check-Ins-Table 1.csv")
+    missed_days_df = pd.read_csv("Missed Days-Table 1.csv")
+    summary_stats_df = pd.read_csv("Monthly Summary-Table 1.csv")
+    return summary_df, performance_df, attendance_df, checkins_df, missed_days_df, summary_stats_df
 
-summary_df, performance_df, attendance_df = load_data()
+summary_df, performance_df, attendance_df, checkins_df, missed_days_df, summary_stats_df = load_data()
 
 # App title
 st.title("May 2025 Sales, Attendance & Rep Performance Dashboard")
@@ -131,5 +134,17 @@ elif view_option == "Attendance Overview":
     st.write("### Raw Attendance Data")
     st.dataframe(rep_attendance.to_frame(name="Status"))
 
-st.write("\n---\n")
-st.caption("Built with Streamlit | Data from May 1–23, 2025")
+    st.write("---")
+    st.write("### Team Check-In Overview")
+    st.line_chart(checkins_df.set_index("Date"))
+
+    st.write("### Missed Days by Rep")
+    st.bar_chart(missed_days_df.set_index("Rep"))
+
+    st.write("### Monthly Summary")
+    st.dataframe(summary_stats_df)
+
+st.write("
+---
+")("Built with Streamlit | Data from May 1–23, 2025")
+
