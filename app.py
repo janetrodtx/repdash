@@ -144,7 +144,5 @@ elif view_option == "Attendance Overview":
     st.write("### Monthly Summary")
     st.dataframe(summary_stats_df)
 
-st.write("
----
-")("Built with Streamlit | Data from May 1–23, 2025")
+st.write("mbo")("Built with Streamlit | Data from May 1–23, 2025")
 
