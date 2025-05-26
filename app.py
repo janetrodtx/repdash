@@ -6,14 +6,13 @@ from datetime import datetime
 
 # Load data
 @st.cache_data
-
 def load_data():
     summary_df = pd.read_csv("may1.csv", skiprows=4)
     performance_df = pd.read_csv("may2.csv", skiprows=4)
-    attendance_df = pd.read_csv("Attendance Enhanced (AMPM)-Table 1.csv", index_col=0)
-    checkins_df = pd.read_csv("Daily Check-Ins-Table 1.csv")
-    missed_days_df = pd.read_csv("Missed Days-Table 1.csv")
-    summary_stats_df = pd.read_csv("Monthly Summary-Table 1.csv")
+    attendance_df = pd.read_csv("Attendance Enhanced (AMPM)-Table 1.csv", sep=",", index_col=0)
+    checkins_df = pd.read_csv("Daily Check-Ins-Table 1.csv", skiprows=1, usecols=[0, 1])
+    missed_days_df = pd.read_csv("Missed Days-Table 1.csv", skiprows=1, usecols=[0, 1])
+    summary_stats_df = pd.read_csv("Monthly Summary-Table 1.csv", skiprows=1)
     return summary_df, performance_df, attendance_df, checkins_df, missed_days_df, summary_stats_df
 
 summary_df, performance_df, attendance_df, checkins_df, missed_days_df, summary_stats_df = load_data()
@@ -53,7 +52,6 @@ elif view_option == "Rep Productivity":
     rep_name = st.selectbox("Select Rep", performance_df["Unnamed: 1"].dropna().unique())
     rep_data = performance_df[performance_df["Unnamed: 1"] == rep_name].iloc[0]
 
-    # Attendance linkage
     if rep_name in attendance_df.index:
         rep_attendance = attendance_df.loc[rep_name]
         days_present = rep_attendance[rep_attendance.str.startswith("✔️")].count()
@@ -61,7 +59,6 @@ elif view_option == "Rep Productivity":
         attendance_ratio = days_present / total_days if total_days > 0 else 0
         st.metric("Attendance Rate", f"{attendance_ratio:.0%}")
 
-        # Attendance vs. performance plot with toggle
         stat_option = st.radio("Compare against", ["Leads", "Quotes", "Messages", "Calls"])
         dates = attendance_df.columns
         presence_status = [1 if val.startswith("✔️") else 0 for val in rep_attendance.values]
@@ -82,9 +79,6 @@ elif view_option == "Rep Productivity":
             value = rep_data["Calls Fielded"]
             color = 'orange'
             label = 'Avg Calls/Present Day'
-            value = rep_data["Sensei Quotes"]
-            color = 'blue'
-            label = 'Avg Quotes/Present Day'
 
         average_value = value / sum(presence_status) if sum(presence_status) > 0 else 0
 
@@ -136,13 +130,12 @@ elif view_option == "Attendance Overview":
 
     st.write("---")
     st.write("### Team Check-In Overview")
-    st.line_chart(checkins_df.set_index("Date"))
+    st.line_chart(checkins_df_clean.set_index("Date"))
 
     st.write("### Missed Days by Rep")
-    st.bar_chart(missed_days_df.set_index("Rep"))
+    st.bar_chart(missed_days_df_clean.set_index("Rep"))
 
     st.write("### Monthly Summary")
     st.dataframe(summary_stats_df)
 
-st.write("mbo")("Built with Streamlit | Data from May 1–23, 2025")
-
+st.caption("Built with Streamlit | Data from May 1–23, 2025")
